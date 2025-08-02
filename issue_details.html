@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicTrack - Issue Details</title>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e0e7ff 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(90deg, #2a4b8d 0%, #1e3a8a 100%);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(90deg, #4a90e2 0%, #2a4b8d 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.3s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn:hover {
+            background: linear-gradient(90deg, #2a4b8d 0%, #4a90e2 100%);
+            transform: translateY(-2px);
+        }
+
+        .issue-details-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .issue-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .issue-image.error {
+            background-color: #f0f0f0;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+            font-weight: 500;
+        }
+
+        .issue-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2a4b8d;
+        }
+
+        .issue-status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: linear-gradient(90deg, #ffeaa7 0%, #ffd700 100%);
+            color: #e17055;
+        }
+
+        .status-in-progress {
+            background: linear-gradient(90deg, #a5d8ff 0%, #87ceeb 100%);
+            color: #1971c2;
+        }
+
+        .status-resolved {
+            background: linear-gradient(90deg, #b2f2bb 0%, #90ee90 100%);
+            color: #2b8a3e;
+        }
+
+        .issue-info {
+            margin-bottom: 20px;
+        }
+
+        .issue-info div {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .issue-info i {
+            color: #f39c12;
+        }
+
+        .issue-description {
+            margin-bottom: 20px;
+            color: #555;
+        }
+
+        .issue-description h3 {
+            font-size: 1.2rem;
+            color: #2a4b8d;
+            margin-bottom: 10px;
+        }
+
+        .issue-reporter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .reporter-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #2a4b8d;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .issue-image {
+                max-height: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .issue-title {
+                font-size: 1.5rem;
+            }
+
+            .issue-image {
+                max-height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>CivicTrack - Issue Details</h1>
+        <a href="index_before_login.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Issues</a>
+    </header>
+
+    <main>
+        <div class="issue-details-container" id="issueDetails">
+            <!-- Issue details will be dynamically inserted here -->
+        </div>
+    </main>
+
+    <script>
+        async function renderIssueDetails(issueId) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/issues/${issueId}`);
+                if (!response.ok) throw new Error('Failed to fetch issue');
+                const issue = await response.json();
+                
+                if (!issue) {
+                    document.getElementById('issueDetails').innerHTML = '<p>Issue not found</p>';
+                    return;
+                }
+
+                let statusClass, statusText;
+                switch(issue.status) {
+                    case 'pending':
+                        statusClass = 'status-pending';
+                        statusText = 'Pending';
+                        break;
+                    case 'in-progress':
+                        statusClass = 'status-in-progress';
+                        statusText = 'In-progress';
+                        break;
+                    case 'resolved':
+                        statusClass = 'status-resolved';
+                        statusText = 'Resolved';
+                        break;
+                    default:
+                        statusClass = 'status-pending';
+                        statusText = 'Pending';
+                }
+
+                const initials = issue.reporter.split(' ').length > 1 
+                    ? issue.reporter.split(' ')[0].charAt(0).toUpperCase() + 
+                      issue.reporter.split(' ')[1].charAt(0).toUpperCase()
+                    : issue.reporter.split('_').length > 1 
+                        ? issue.reporter.split('_')[0].charAt(0).toUpperCase() + 
+                          issue.reporter.split('_')[1].charAt(0).toUpperCase()
+                        : issue.reporter.charAt(0).toUpperCase();
+
+                document.getElementById('issueDetails').innerHTML = `
+                    <img src="${issue.image || 'https://via.placeholder.com/300?text=No+Image'}" alt="${issue.title}" class="issue-image" onerror="this.className='issue-image error'; this.src=''; this.alt='Image failed to load'; this.textContent='Image unavailable';">
+                    <div class="issue-status ${statusClass}">${statusText}</div>
+                    <h2 class="issue-title">${issue.title}</h2>
+                    <div class="issue-info">
+                        <div class="issue-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Location: ${issue.location}</span>
+                        </div>
+                        <div class="issue-distance">
+                            <i class="fas fa-ruler"></i>
+                            <span>Distance: ${issue.distance || 'N/A'} away</span>
+                        </div>
+                        <div class="issue-reported-date">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Reported on: ${issue.reported_date}</span>
+                        </div>
+                    </div>
+                    <div class="issue-description">
+                        <h3>Description</h3>
+                        <p>${issue.description || 'No description provided'}</p>
+                    </div>
+                    <div class="issue-reporter">
+                        <div class="reporter-avatar">${initials}</div>
+                        <span>Reported by: ${issue.reporter}</span>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Error fetching issue:', error);
+                document.getElementById('issueDetails').innerHTML = '<p>Error loading issue details</p>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const issueId = urlParams.get('id');
+            renderIssueDetails(issueId);
+        });
+    </script>
+</body>
+</html>
